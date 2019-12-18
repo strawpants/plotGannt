@@ -1,0 +1,19 @@
+Tasks:
+    First task:
+        color: "#004da2"
+        periods: 
+            - ["2020-01-01", "2020-06-30"]
+            - ["2020-10-01", "2020-12-31"]
+    Second task:
+        color: "tab:orange"
+        longname: "An optional longer name possibly\n with a line break"
+        periods:
+            - ["2020-07-01","2020-09-30"]
+    Third task:
+        color: "tab:green"
+        periods:
+            - ["2020-01-01","2021-11-30"]
+    Fourth task:
+        color: "tab:blue"
+        periods:
+            - ["2020-06-01","2021-12-30"]
