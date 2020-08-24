@@ -17,3 +17,7 @@ Tasks:
         color: "tab:blue"
         periods:
             - ["2020-06-01","2021-12-30"]
+Milestones:
+    M1 First Milestone:
+        color: "tab:blue"
+        epoch: "2020-05-15"

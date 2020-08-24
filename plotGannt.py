@@ -14,15 +14,16 @@ import matplotlib.dates
 from matplotlib.dates import num2date,date2num,YEARLY,WEEKLY,MONTHLY, DateFormatter, rrulewrapper, RRuleLocator, datestr2num, MonthLocator,YearLocator
 import numpy as np
 import collections
-from yaml import load as yamlload
+from yaml import safe_load as yamlload
 import sys
 import argparse
 import locale
 
 Task=collections.namedtuple("Task","name slots color")
 
+MileStone=collections.namedtuple("MileStone","name epoch color linewidth fontsize")
 
-def readTasks(yamlfile):
+def readTasksMilestones(yamlfile):
     with open(yamlfile,"rt") as fid: 
         yatasks=yamlload(fid)
 
@@ -37,11 +38,27 @@ def readTasks(yamlfile):
         else:
             name=ky
         tasks.append(Task(name=name,slots=slot,color=task["color"]))
+    milestones=[]
+    for ky,milestone in yatasks["Milestones"].items():
+        if "color" in milestone:
+            color=milestone["color"]
+        else:
+            color="black"
+        if "linewidth" in milestone:
+            linewidth=milestone["linewidth"]
+        else:
+            linewidth=4
 
-    return tasks
+        if "fontsize" in milestone:
+            fontsize=milestone["fontsize"]
+        else:
+            fontsize=24
+        milestones.append(MileStone(name=ky,epoch=datestr2num(milestone["epoch"]),color=color,linewidth=linewidth,fontsize=fontsize)) 
+
+    return tasks,milestones
 
 def plotGantt(args):
-    data=readTasks(args.taskfile)
+    tasks,milestones=readTasksMilestones(args.taskfile)
     fsize=24
 
     width=20
@@ -55,9 +72,9 @@ def plotGantt(args):
         locale.setlocale(locale.LC_ALL,args.locale)
    
     ax = fig.add_subplot(111)
-    yval=len(data)
+    yval=len(tasks)
     axlim=[sys.float_info.max,sys.float_info.min]
-    for task in data:
+    for task in tasks:
         for st,nd in task.slots:
             ax.barh(yval,width=nd-st,height=0.9,left=st,color=task.color)
             axlim[0]=min(axlim[0],st)
@@ -66,6 +83,13 @@ def plotGantt(args):
         pos.append(yval)
         yval-=1
     ax.set_xlim(axlim)
+
+    #also plot Milestones
+    for milestone in milestones:
+        ytop=1.02*ax.get_ylim()[1]
+        ax.axvline(milestone.epoch,ymax=1.02,clip_on=False,color=milestone.color,linewidth=milestone.linewidth,marker="o",markersize=3*milestone.linewidth,markevery=[1])
+        #make a label
+        ax.text(milestone.epoch,ytop,milestone.name,fontsize=milestone.fontsize,color=milestone.color,rotation=30)
     ax.xaxis.set_major_formatter(myFmt)
     #rule = rrulewrapper(MONTHLY, interval=3)
     # rule = rrulewrapper(YEARLY, interval=1)
@@ -98,7 +122,7 @@ def main(argv):# plot
                     help='Specify the output graphicsfile (e.g. Gannt.svg(default), Gannt.png or Gannt.pdf),',default="Gannt.svg")
     
     parser.add_argument('-l','--locale', metavar='LOCALE', type=str,
-                    help='Set the locale used for formatting dates e.g. (de_DE), defaults to en_US',default="en_US")
+                    help='Set the locale used for formatting dates e.g. (de_DE), defaults to en_US',default="en_US.utf-8")
     
     parser.add_argument('-r','--ratio', metavar='ASPECTRATIO', type=float,
             help='Specify the aspect ratio (w/h as a float)  of the plot, defaults to 16:9',default=16/9)
