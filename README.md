@@ -1,7 +1,7 @@
 # Create a Gannt plot from a yaml file with tasks 
 
 ## Basic usage
-* modify ``tasks.yml`` to suit your needs  
+* modify ``tasks.yml`` to suit your needs. 
 * Run ``./plotGannt.py``. This will create the output ``Gannt.svg`` from the file ``tasks.yml``
 
 ## more advanced usage
@@ -25,6 +25,9 @@ optional arguments:
                         Specify the aspect ratio (w/h as a float)  of the plot, defaults to 16:9
 
 ```
+## Specifying epochs in the yaml file
+Dates can be specified by a datestring format which is understood by [dateutil](https://dateutil.readthedocs.io/en/stable/). Alternatively one can specify an increment in days `+xxd` or months `+xxm` which will be added to the `tstart` variable as specified in the yaml file (see tasks.yml for an example).
+
 
 # Example
 ![Example Gannt plot](Gannt.svg)

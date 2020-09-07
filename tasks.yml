@@ -1,9 +1,10 @@
+tstart: "2020-01-01"
 Tasks:
     First task:
         color: "#004da2"
         periods: 
-            - ["2020-01-01", "2020-06-30"]
-            - ["2020-10-01", "2020-12-31"]
+            - ["2020-01-01", "+180d"]
+            - ["+10m", "2020-12-31"]
     Second task:
         color: "tab:orange"
         longname: "An optional longer name possibly\n with a line break"
