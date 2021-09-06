@@ -1,3 +1,4 @@
+#uncomment the tstart below to print relative time in months since project start (Note in that case, slots may only be given in +m +d format)
 tstart: "2020-01-01"
 Tasks:
     First task:

@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 import matplotlib.font_manager as font_manager
 import matplotlib.dates
 from matplotlib.dates import num2date,date2num,YEARLY,WEEKLY,MONTHLY, DateFormatter, rrulewrapper, RRuleLocator, datestr2num, MonthLocator,YearLocator
+import matplotlib.ticker as ticker
 from dateutil.parser import ParserError
 import numpy as np
 import re
@@ -31,7 +32,7 @@ def conv2date(dtstr,tstart=None):
         dout=datestr2num(dtstr)
     except ParserError as e:
         if not tstart:
-            raise RuntimeError("cannot parse relative times without specifying tstart in the tasks file")
+            tstart=0 #Compute timedeltas only
         #try interpreting this as an interval length (in days or months)
         m=re.search("\+([0-9]+)([dm])",dtstr)
         if not m:
@@ -98,8 +99,6 @@ def plotGantt(args):
     fig=plt.figure(figsize=(width,height))
     ylabels=[]
     pos=[]
-    myFmt = DateFormatter('%b %Y')
-    # myFmt = DateFormatter('%Y')
     if args.locale:
         locale.setlocale(locale.LC_ALL,args.locale)
    
@@ -122,16 +121,24 @@ def plotGantt(args):
         ax.axvline(milestone.epoch,ymax=1.02,clip_on=False,color=milestone.color,linewidth=milestone.linewidth,marker="o",markersize=3*milestone.linewidth,markevery=[1])
         #make a label
         ax.text(milestone.epoch,ytop,milestone.name,fontsize=milestone.fontsize,color=milestone.color,rotation=45)
-    ax.xaxis.set_major_formatter(myFmt)
     #rule = rrulewrapper(MONTHLY, interval=3)
     # rule = rrulewrapper(YEARLY, interval=1)
     # loc = RRuleLocator(rule)
-    hyrloc= MonthLocator((1,7))
-    qloc= MonthLocator((1,4,7,10))
-    ax.xaxis.set_major_locator(hyrloc)
-    ax.xaxis.set_minor_locator(qloc)
+    if tasks[0].slots[0][0] > 10000:
+        #assume it's a matplotlib date
+        myFmt = DateFormatter('%b %Y')
+        ax.xaxis.set_major_formatter(myFmt)
+        hyrloc= MonthLocator((1,7))
+        qloc= MonthLocator((1,4,7,10))
+        ax.xaxis.set_major_locator(hyrloc)
+        ax.xaxis.set_minor_locator(qloc)
+    else:
+        #assume it's a relative time in months since project start
+        ax.xaxis.set_major_locator(ticker.MultipleLocator(6*30.25))
+        ax.xaxis.set_major_formatter(lambda x, pos: "%d months"%(x/30.25))
+    
     labelsx = ax.get_xticklabels()
-    plt.setp(labelsx, rotation=45, fontsize=fsize)
+    plt.setp(labelsx, rotation=45, fontsize=fsize,ha="right")
     locsy, labelsy = plt.yticks(pos,ylabels)
     plt.setp(labelsy, fontsize = fsize)
     ax.grid(color = 'grey',which='major', linestyle = '-')
