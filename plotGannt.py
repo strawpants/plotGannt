@@ -23,26 +23,30 @@ import locale
 
 Task=collections.namedtuple("Task","name slots color")
 
-MileStone=collections.namedtuple("MileStone","name epoch color linewidth fontsize")
+MileStone=collections.namedtuple("MileStone","name epoch color linewidth fontsize textshift")
 
 def conv2date(dtstr,tstart=None):
     """Convert epoch string or time interval to matplotlib date"""
     #we possibly have a timeinterval  as input so wrap in exception block
-    try:
-        dout=datestr2num(dtstr)
-    except ParserError as e:
+    
+    m=re.search("([\+\-])([0-9]+)([dm])",dtstr)
+    if m:
+        if m.group(3) == "m":
+            dt=30.5*float(m.group(2)) #scale with average days per month
+        elif m.group(3) == "d":
+            dt=float(m.group(2))
+        if m.group(1) == "+":
+            fac=1
+        else:
+            fac=-1
+        
         if not tstart:
             tstart=0 #Compute timedeltas only
-        #try interpreting this as an interval length (in days or months)
-        m=re.search("\+([0-9]+)([dm])",dtstr)
-        if not m:
-            raise RuntimeError("Cannot parse relative time string: use +XXXd or +XXm") 
-        if m.group(2) == "m":
-            dt=30.5*float(m.group(1)) #scale with average days per month
-        elif m.group(2) == "d":
-            dt=float(m.group(1))
         
-        dout=tstart+dt
+        dout=tstart+fac*dt
+    else:
+        dout=datestr2num(dtstr)
+    
     return dout
 
 def readTasksMilestones(yamlfile):
@@ -86,7 +90,12 @@ def readTasksMilestones(yamlfile):
             name=milestone["longname"]
         else:
             name=ky
-        milestones.append(MileStone(name=name,epoch=conv2date(milestone["epoch"],tstart),color=color,linewidth=linewidth,fontsize=fontsize)) 
+        if "textshift" in milestone:
+            textshift=conv2date(milestone["textshift"])
+        else:
+            textshift=0
+
+        milestones.append(MileStone(name=name,epoch=conv2date(milestone["epoch"],tstart),color=color,linewidth=linewidth,fontsize=fontsize,textshift=textshift)) 
 
     return tasks,milestones
 
@@ -120,7 +129,7 @@ def plotGantt(args):
         ytop=1.02*ax.get_ylim()[1]
         ax.axvline(milestone.epoch,ymax=1.02,clip_on=False,color=milestone.color,linewidth=milestone.linewidth,marker="o",markersize=3*milestone.linewidth,markevery=[1])
         #make a label
-        ax.text(milestone.epoch,ytop,milestone.name,fontsize=milestone.fontsize,color=milestone.color,rotation=45)
+        ax.text(milestone.epoch+milestone.textshift,ytop,milestone.name,fontsize=milestone.fontsize,color=milestone.color,rotation=45)
     #rule = rrulewrapper(MONTHLY, interval=3)
     # rule = rrulewrapper(YEARLY, interval=1)
     # loc = RRuleLocator(rule)

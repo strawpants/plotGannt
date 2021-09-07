@@ -23,3 +23,8 @@ Milestones:
     M1 First Milestone:
         color: "tab:blue"
         epoch: "2020-05-15"
+        textshift: "-1m" # You may give this parameter to shift the text of the label horizontally
+    M2:
+        longname: "M2 longer milestone name"
+        color: "tab:blue"
+        epoch: "2020-05-30"
