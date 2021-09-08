@@ -129,7 +129,7 @@ def plotGantt(args):
         ytop=1.02*ax.get_ylim()[1]
         ax.axvline(milestone.epoch,ymax=1.02,clip_on=False,color=milestone.color,linewidth=milestone.linewidth,marker="o",markersize=3*milestone.linewidth,markevery=[1])
         #make a label
-        ax.text(milestone.epoch+milestone.textshift,ytop,milestone.name,fontsize=milestone.fontsize,color=milestone.color,rotation=45)
+        ax.text(milestone.epoch+milestone.textshift,ytop,milestone.name,fontsize=milestone.fontsize,color=milestone.color,rotation=-45,ha="right")
     #rule = rrulewrapper(MONTHLY, interval=3)
     # rule = rrulewrapper(YEARLY, interval=1)
     # loc = RRuleLocator(rule)
