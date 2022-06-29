@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# # Make a Gantt plot 
+# # Make a Gantt plot from a yaml file
 # 
-# Author: Roelof Rietbroek,  18 December 2019
+# Author: Roelof Rietbroek,  29 June 2022
+# The github repository associated with this file can be found on https://github.com/strawpants/plotGannt
+# Don't forget to star the repository if you find it useful.
 # inspired [by](https://sukhbinder.wordpress.com/2016/05/10/quick-gantt-chart-with-matplotlib/)
 
 
@@ -71,31 +73,32 @@ def readTasksMilestones(yamlfile):
             name=ky
         tasks.append(Task(name=name,slots=slot,color=task["color"]))
     milestones=[]
-    for ky,milestone in yatasks["Milestones"].items():
-        if "color" in milestone:
-            color=milestone["color"]
-        else:
-            color="black"
-        if "linewidth" in milestone:
-            linewidth=milestone["linewidth"]
-        else:
-            linewidth=4
+    if "Milestones" in yatasks:
+        for ky,milestone in yatasks["Milestones"].items():
+            if "color" in milestone:
+                color=milestone["color"]
+            else:
+                color="black"
+            if "linewidth" in milestone:
+                linewidth=milestone["linewidth"]
+            else:
+                linewidth=4
 
-        if "fontsize" in milestone:
-            fontsize=milestone["fontsize"]
-        else:
-            fontsize=24
-        
-        if "longname" in milestone:
-            name=milestone["longname"]
-        else:
-            name=ky
-        if "textshift" in milestone:
-            textshift=conv2date(milestone["textshift"])
-        else:
-            textshift=0
+            if "fontsize" in milestone:
+                fontsize=milestone["fontsize"]
+            else:
+                fontsize=24
+            
+            if "longname" in milestone:
+                name=milestone["longname"]
+            else:
+                name=ky
+            if "textshift" in milestone:
+                textshift=conv2date(milestone["textshift"])
+            else:
+                textshift=0
 
-        milestones.append(MileStone(name=name,epoch=conv2date(milestone["epoch"],tstart),color=color,linewidth=linewidth,fontsize=fontsize,textshift=textshift)) 
+            milestones.append(MileStone(name=name,epoch=conv2date(milestone["epoch"],tstart),color=color,linewidth=linewidth,fontsize=fontsize,textshift=textshift)) 
 
     return tasks,milestones
 
@@ -152,7 +155,8 @@ def plotGantt(args):
     plt.setp(labelsy, fontsize = fsize)
     ax.grid(color = 'grey',which='major', linestyle = '-')
     ax.grid(color = 'grey', which='minor',linestyle = ':')
-
+    if args.title:
+        plt.title(args.title,fontsize=fsize)
     plt.tight_layout()
 
     plt.savefig(args.output)
@@ -171,6 +175,8 @@ def main(argv):# plot
     
     parser.add_argument('-l','--locale', metavar='LOCALE', type=str,
                     help='Set the locale used for formatting dates e.g. (de_DE), defaults to en_US',default="en_US.utf-8")
+    parser.add_argument('-t','--title', metavar='TITLE', type=str,
+                    help='Add a title to the plot',default=None)
     
     parser.add_argument('-r','--ratio', metavar='ASPECTRATIO', type=float,
             help='Specify the aspect ratio (w/h as a float)  of the plot, defaults to 16:9',default=16/9)
